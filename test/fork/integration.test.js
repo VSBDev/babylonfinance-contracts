@@ -120,4 +120,65 @@ describe('Babylon integrations', function () {
     await increaseTime(ONE_DAY_IN_SECONDS * 30);
     await customStrategy.connect(keeper).finalizeStrategy(0, '', 0);
   });
+
+  it('can deploy a strategy with the Badger Custom integration', async () => {
+
+    const VALID_BADGER_VAULT = '0x19D97D8fA813EE2f51aD4B4e04EA08bAf4DFfC28'; //Badger Vault
+
+    // We deploy the custom yearn integration. Change with your own integration when ready
+    const customIntegration = await deploy('CustomIntegrationBadger', {
+      from: alice.address,
+      args: [controller.address],
+    });
+    console.log('badger customIntegration: ', customIntegration);
+
+
+    let strategy = await garden.connect(alice).addStrategy(
+      'Execute my custom integration',
+      '💎',
+      [
+        eth(10), // maxCapitalRequested: eth(10),
+        eth(0.1), // stake: eth(0.1),
+        ONE_DAY_IN_SECONDS * 30, // strategyDuration: ONE_DAY_IN_SECONDS * 30,
+        eth(0.05), // expectedReturn: eth(0.05),
+        eth(0.1), // maxAllocationPercentage: eth(0.1),
+        eth(0.05), // maxGasFeePercentage: eth(0.05),
+        eth(0.09), // maxTradeSlippagePercentage: eth(0.09),
+      ],
+      [5], // _opTypes
+      [customIntegration.address], // _opIntegrations
+      new ethers.utils.AbiCoder().encode(
+        ['address', 'uint256'],
+        [VALID_BADGER_VAULT, 0] // integration params. We pass bbadger vault
+      ), // _opEncodedDatas
+    );
+
+    console.log("BADGER STRATEGY ADDED!")
+
+    const strategies = await garden.getStrategies();
+    customStrategy = await ethers.getContractAt('IStrategy', strategies[0]);
+
+    //We need to impersonate badger dao governance to approve the custom strategy contract
+    const GOVERNANCE_BADGER_ADDRESS = '0xb65cef03b9b89f99517643226d76e286ee999e77';
+    const SETT_GOVERNANCE = await impersonateAddress(GOVERNANCE_BADGER_ADDRESS);
+    let settcontract = await ethers.getContractAt('IBadgerVault',VALID_BADGER_VAULT);
+    let approvecontractTx = await settcontract.connect(SETT_GOVERNANCE).approveContractAccess(customStrategy.address);
+    console.log(approvecontractTx);
+
+    await garden.connect(alice).deposit(eth(1), 0, alice.address, ADDRESS_ZERO, {
+      value: eth(1),
+    });
+    const balance = await garden.balanceOf(alice.getAddress());
+
+    // Vote Strategy
+    await customStrategy.connect(keeper).resolveVoting([alice.address], [balance], 0);
+
+    // Execute strategy
+    await increaseTime(ONE_DAY_IN_SECONDS);
+    await customStrategy.connect(keeper).executeStrategy(eth(1), 0);
+
+    // Finalize strategy
+    await increaseTime(ONE_DAY_IN_SECONDS * 30);
+    await customStrategy.connect(keeper).finalizeStrategy(0, '', 0);
+  });
 });
