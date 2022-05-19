@@ -32,7 +32,7 @@ contract CustomIntegrationBadger is CustomIntegration {
     using ControllerLib for IBabController;
 
     address public constant BADGER_REGISTRY = 0xFda7eB6f8b7a9e9fCFd348042ae675d1d652454f;
-
+    address public constant BADGER_TOKEN = 0x3472A5A71965499acd81997a54BBA8D852C6E53d;
     /* ============ State Variables ============ */
     mapping (address => bool) _valid_badger_v1_vaults;
 
@@ -51,11 +51,11 @@ contract CustomIntegrationBadger is CustomIntegration {
         IBadgerRegistry badgerRegistryInterface = IBadgerRegistry(BADGER_REGISTRY);
         address[] memory openV1Vaults = badgerRegistryInterface.getFilteredProductionVaults("v1",VaultStatus.open);
         
-        console.log("V1 open vaults found:");
-        console.log(openV1Vaults.length); 
+        //console.log("V1 open vaults found:");
+        //console.log(openV1Vaults.length); 
 
         for (uint256 i=0; i<openV1Vaults.length; i++) {
-            console.log(openV1Vaults[i]);
+            //console.log(openV1Vaults[i]);
             _valid_badger_v1_vaults[openV1Vaults[i]] = true;
         }
 
@@ -71,7 +71,7 @@ contract CustomIntegrationBadger is CustomIntegration {
      */
     function _isValid(bytes memory _data) internal view override returns (bool) {
         address _vault = BytesLib.decodeOpDataAddressAssembly(_data, 12);
-        console.log("_isValid: ", _valid_badger_v1_vaults[_vault]);
+        //console.log("_isValid: ", _valid_badger_v1_vaults[_vault]);
         return _valid_badger_v1_vaults[_vault];
     }
 
@@ -179,7 +179,9 @@ contract CustomIntegrationBadger is CustomIntegration {
     function _getRewardTokens(
         address /* _data */
     ) internal pure override returns (address[] memory) {
-        return new address[](1);
+        address[] memory rewards = new address[](1);
+        rewards[0]=BADGER_TOKEN;
+        return rewards;
     }
 
     /* ============ External Functions ============ */
