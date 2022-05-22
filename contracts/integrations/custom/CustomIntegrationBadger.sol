@@ -33,6 +33,7 @@ contract CustomIntegrationBadger is CustomIntegration {
 
     address public constant BADGER_REGISTRY = 0xFda7eB6f8b7a9e9fCFd348042ae675d1d652454f;
     address public constant BADGER_TOKEN = 0x3472A5A71965499acd81997a54BBA8D852C6E53d;
+
     /* ============ State Variables ============ */
     mapping (address => bool) _valid_badger_v1_vaults;
 
@@ -50,15 +51,13 @@ contract CustomIntegrationBadger is CustomIntegration {
 
         IBadgerRegistry badgerRegistryInterface = IBadgerRegistry(BADGER_REGISTRY);
         address[] memory openV1Vaults = badgerRegistryInterface.getFilteredProductionVaults("v1",VaultStatus.open);
-        
         //console.log("V1 open vaults found:");
         //console.log(openV1Vaults.length); 
 
         for (uint256 i=0; i<openV1Vaults.length; i++) {
             //console.log(openV1Vaults[i]);
             _valid_badger_v1_vaults[openV1Vaults[i]] = true;
-        }
-
+        }     
     }
 
     /* =============== Internal Functions ============== */
@@ -216,7 +215,7 @@ contract CustomIntegrationBadger is CustomIntegration {
      * @return exitTokens                 List of output tokens to receive on exit
      * @return _minAmountsOut             List of min amounts for the output tokens to receive
      */
-    function getOutputTokensAndMinAmountOut(bytes calldata _data, uint256 _liquidity) 
+    function getOutputTokensAndMinAmountOut(address /*_strategy*/, bytes calldata _data, uint256 _liquidity) 
         external 
         view 
         override 

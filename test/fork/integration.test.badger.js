@@ -135,7 +135,7 @@ describe('Babylon BADGER Irioder integrations', function () {
       name: 'bcrvRenBTC',
       needs: '0x93054188d876f558f4a66B2EF1d97d16eDf0895B', //bcrvRenBTC
     },
-    //'Failed midway in out synthsrc/dest rate stale or flagged;'
+    //'Failed midway in out synthsrc/dest rate stale or flagged; Babylon synthetix not supported'
     /*{
       vault: '0xd04c48a53c111300ad41190d63681ed3dad998ec',
       curve: true,
@@ -178,13 +178,12 @@ describe('Babylon BADGER Irioder integrations', function () {
       name: 'bcrvTricrypto',
       needs: '0x80466c64868E1ab14a1Ddf27A676C3fcBE638Fe5', //bcrvTricrypto
     },
-    //reverted with reason string 'Not a valid pool'
-    /*{
+    {
       vault: '0x27e98fc7d05f54e544d16f58c194c2d7ba71e3b5',
       curve: true,
       name: 'bcrvTricrypto2',
-      needs: '0xc4ad29ba4b3c580e6d59105fff484999997675ff', //bcrvTricrypto2
-    },*/
+      needs: '0xD51a44d3FaE010294C616388b506AcdA1bfAAE46', //bcrvTricrypto2
+    }
   ]
 
   for(let i=0; i < badger_curve_addresses.length; i++){
@@ -194,7 +193,6 @@ describe('Babylon BADGER Irioder integrations', function () {
       const VALID_BADGER_VAULT = badger_curve_addresses[i].vault;
       const curvePoolIntegrationAddress = getBabylonContractByName('CurvePoolIntegration');
   
-      // We deploy the custom yearn integration. Change with your own integration when ready
       const customIntegration = await deploy('CustomIntegrationBadger', {
         from: alice.address,
         args: [controller.address],
@@ -216,7 +214,7 @@ describe('Babylon BADGER Irioder integrations', function () {
         [curvePoolIntegrationAddress, customIntegration.address], // _opIntegrations
         new ethers.utils.AbiCoder().encode(
           ['address', 'uint256', 'address', 'uint256'],
-          [needs, 0, VALID_BADGER_VAULT, 0] // integration params. We pass 3crypto pool + yearn vault
+          [needs, 0, VALID_BADGER_VAULT, 0] // integration params.
         ), // _opEncodedDatas
       );
   
